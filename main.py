@@ -5,10 +5,16 @@ from pipeline_mlp import mlp
 
 def main():
     print("=====Histgradient=====")
+    with open("logs.txt", "a", encoding="utf-8") as f:
+        f.write("=====Histgradient=====")
     histgradient()
     print("=====KNN=====")
+    with open("logs.txt", "a", encoding="utf-8") as f:
+        f.write("=====KNN=====")
     knn()
     print("=====MLP=====")
+    with open("logs.txt", "a", encoding="utf-8") as f:
+        f.write("=====MLP=====")
     mlp()
 
 if __name__ == "__main__":

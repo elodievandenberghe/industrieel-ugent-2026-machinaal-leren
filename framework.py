@@ -11,12 +11,12 @@ from sklearn.metrics import (
     confusion_matrix,
     f1_score,
 )
-from sklearn.model_selection import StratifiedGroupKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.preprocessing import StandardScaler
-DATA_PATH = "../Spotify_tracks_final.csv"
+from sklearn.model_selection import train_test_split
+DATA_PATH = "Spotify_tracks_final.csv"
 TARGET = "genre"
 AUDIO_FEATURES = [
     "loudness", "acousticness", "energy", "instrumentalness",
@@ -123,7 +123,6 @@ def plot_confusion_matrix(y_true, y_pred, labels, out_path):
     fig.savefig(f"./confusion_matrices/{out_path}.png")  
     plt.close(fig)
 
-
 def evaluate(model, X_test, y_test, out_path):
     y_pred = model.predict(X_test)
     print(f"Accuracy: {accuracy_score(y_test, y_pred):.3f}")
@@ -133,14 +132,14 @@ def evaluate(model, X_test, y_test, out_path):
         f.write(f"Accuracy: {accuracy_score(y_test, y_pred):.3f}")
         f.write(classification_report(y_test, y_pred, zero_division=0))
     result = permutation_importance(
-        model, X_test, y_test, n_repeats=5, random_state=42, n_jobs=1
+        model, X_test, y_test, n_repeats=5, random_state=42, n_jobs=-1
     )
     importances = pd.Series(result.importances_mean, index=X_test.columns)
     print("\nPermutation importances (test set):")
     print(importances.sort_values(ascending=False))
     with open("logs.txt", "a", encoding="utf-8") as f:
         f.write("\nPermutation importances (test set):")
-        f.write(importances.sort_values(ascending=False))
+        f.write("{importances.sort_values(ascending=False)}")
     plot_confusion_matrix(y_test, y_pred, model.classes_, out_path)
 
 
@@ -158,7 +157,6 @@ def train_model(model, out_path, param_field):
     ).dt.year
 
     y = df[TARGET]
-    groups = df["artist_id"]
     X = df[AUDIO_FEATURES]
 
     preprocess = ColumnTransformer(
@@ -167,26 +165,39 @@ def train_model(model, out_path, param_field):
         verbose_feature_names_out=False,
     )
 
-    sgkf = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42)
-    train_idx, test_idx = next(sgkf.split(X, y, groups=groups))
-    X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
-    y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
-    print(f"Dataset: {len(X)} samples ({len(X_train)} train, {len(X_test)} test)\n")
+    X_train_val, X_test, y_train_val, y_test = train_test_split(
+        X,
+        y,
+        test_size=0.15,
+        stratify=y,
+        random_state=42
+    )
+
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_train_val,
+        y_train_val,
+        test_size=0.176,
+        stratify=y_train_val,
+        random_state=42
+    )
+    print(f"Dataset: {len(X)} samples ({len(X_train)} train, {len(X_test)} test, {len(X_val)} val))\n")
     with open("logs.txt", "a", encoding="utf-8") as f:
-        f.write(f"Dataset: {len(X)} samples ({len(X_train)} train, {len(X_test)} test)\n")
+        f.write(f"Dataset: {len(X)} samples ({len(X_train)} train, {len(X_test)} test, {len(X_val)} val))\n")
     pipeline = Pipeline([
         ("preprocess", preprocess),
         ("scale", StandardScaler()),
         ("model", model),
     ])
-    gs = RandomizedSearchCV(estimator=pipeline, cv=sgkf, param_distributions=param_field, scoring="accuracy", n_jobs=-1, random_state=42, refit=True)
+    gs = RandomizedSearchCV(estimator=pipeline, cv=5, param_distributions=param_field, scoring="accuracy", n_jobs=-1, random_state=42, refit=True)
     idx = X_train.sample(n=100000, random_state=42).index
-    gs.fit(X_train.loc[idx], y_train.loc[idx], groups=groups.loc[idx])
+    gs.fit(X_train.loc[idx], y_train.loc[idx])
     print(gs.best_params_, gs.best_score_)
     with open("logs.txt", "a", encoding="utf-8") as f:
-        f.write(gs.best_params_, gs.best_score_)
+        f.write(f"{gs.best_params_, gs.best_score_}")
     best_model = gs.best_estimator_       
-
+    validation_accuracy = best_model.score(X_val, y_val)
+    print(f"Vallidation accuracy: {validation_accuracy}")
+    with open("logs.txt", "a", encoding="utf-8") as f:
+        f.write(f"Vallidation accuracy: {validation_accuracy}")
     best_model.fit(X_train, y_train)
     evaluate(best_model, X_test, y_test, out_path)
-

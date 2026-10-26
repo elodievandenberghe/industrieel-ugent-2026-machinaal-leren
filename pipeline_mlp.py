@@ -12,6 +12,6 @@ MLP_PARAMS = {
 }
 def mlp():
     model= MLPClassifier(hidden_layer_sizes=(64, 32), max_iter=1000,
-                              early_stopping=True, random_state=42)
+                              early_stopping=True, random_state=42, n_jobs=-1)
     train_model(model, "confusion_matrix_mlp", MLP_PARAMS)
     

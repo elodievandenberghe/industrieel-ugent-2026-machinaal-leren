@@ -14,7 +14,8 @@ HISTGRADIENT_PARAMS = {
 def histgradient():
     model = HistGradientBoostingClassifier(
         min_samples_leaf=5,
-        random_state=42
+        random_state=42,
+        n_jobs=-1
     )
     train_model(model, "confusion_matrix_histgradientboost", HISTGRADIENT_PARAMS)
     

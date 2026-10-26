@@ -128,14 +128,19 @@ def evaluate(model, X_test, y_test, out_path):
     y_pred = model.predict(X_test)
     print(f"Accuracy: {accuracy_score(y_test, y_pred):.3f}")
     print(classification_report(y_test, y_pred, zero_division=0))
-
+    
+    with open("logs.txt", "a", encoding="utf-8") as f:
+        f.write(f"Accuracy: {accuracy_score(y_test, y_pred):.3f}")
+        f.write(classification_report(y_test, y_pred, zero_division=0))
     result = permutation_importance(
         model, X_test, y_test, n_repeats=5, random_state=42, n_jobs=1
     )
     importances = pd.Series(result.importances_mean, index=X_test.columns)
     print("\nPermutation importances (test set):")
     print(importances.sort_values(ascending=False))
-
+    with open("logs.txt", "a", encoding="utf-8") as f:
+        f.write("\nPermutation importances (test set):")
+        f.write(importances.sort_values(ascending=False))
     plot_confusion_matrix(y_test, y_pred, model.classes_, out_path)
 
 
@@ -167,6 +172,8 @@ def train_model(model, out_path, param_field):
     X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
     y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
     print(f"Dataset: {len(X)} samples ({len(X_train)} train, {len(X_test)} test)\n")
+    with open("logs.txt", "a", encoding="utf-8") as f:
+        f.write(f"Dataset: {len(X)} samples ({len(X_train)} train, {len(X_test)} test)\n")
     pipeline = Pipeline([
         ("preprocess", preprocess),
         ("scale", StandardScaler()),
@@ -176,6 +183,8 @@ def train_model(model, out_path, param_field):
     idx = X_train.sample(n=100000, random_state=42).index
     gs.fit(X_train.loc[idx], y_train.loc[idx], groups=groups.loc[idx])
     print(gs.best_params_, gs.best_score_)
+    with open("logs.txt", "a", encoding="utf-8") as f:
+        f.write(gs.best_params_, gs.best_score_)
     best_model = gs.best_estimator_       
 
     best_model.fit(X_train, y_train)

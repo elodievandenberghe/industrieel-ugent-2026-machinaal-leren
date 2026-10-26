@@ -124,7 +124,7 @@ def plot_confusion_matrix(y_true, y_pred, labels, out_path):
     plt.close(fig)
 
 def evaluate(model, X_test, y_test, out_path):
-    y_pred = model.predict(X_test)
+    y_pred = model.predict(X_test, n_jobs=-1)
     print(f"Accuracy: {accuracy_score(y_test, y_pred):.3f}")
     print(classification_report(y_test, y_pred, zero_division=0))
     

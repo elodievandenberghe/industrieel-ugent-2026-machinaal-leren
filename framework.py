@@ -12,9 +12,8 @@ from sklearn.metrics import (
     f1_score,
 )
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import RandomizedSearchCV
-from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 DATA_PATH = "Spotify_tracks_final.csv"
 TARGET = "genre"
@@ -146,7 +145,7 @@ def evaluate(model, X_test, y_test, out_path):
 def train_model(model, out_path, param_field):
     df = (
         pd.read_csv(DATA_PATH, index_col=0)
-        .drop_duplicates(subset=["track_id"], keep="first")
+        .drop_duplicates(subset=["track_name"], keep="first")
         .assign(**{TARGET: lambda d: d[TARGET].map(GENRE_MAPPING)})
         .dropna(subset=[TARGET])
         .copy()
@@ -159,12 +158,14 @@ def train_model(model, out_path, param_field):
     y = df[TARGET]
     X = df[AUDIO_FEATURES]
 
+    # Encoding van key. De waarde van mode moet niet encode worden want dit is al een binaire waarde. 
     preprocess = ColumnTransformer(
         [("key_ohe", OneHotEncoder(handle_unknown="ignore", sparse_output=False), ["key"])],
         remainder="passthrough",
         verbose_feature_names_out=False,
     )
 
+    # Split van 70 - 15 - 15
     X_train_val, X_test, y_train_val, y_test = train_test_split(
         X,
         y,
@@ -172,7 +173,7 @@ def train_model(model, out_path, param_field):
         stratify=y,
         random_state=42
     )
-
+    # 0.15 / 0.85 = 0.17647... 
     X_train, X_val, y_train, y_val = train_test_split(
         X_train_val,
         y_train_val,
@@ -183,18 +184,22 @@ def train_model(model, out_path, param_field):
     print(f"Dataset: {len(X)} samples ({len(X_train)} train, {len(X_test)} test, {len(X_val)} val))\n")
     with open("logs.txt", "a", encoding="utf-8") as f:
         f.write(f"Dataset: {len(X)} samples ({len(X_train)} train, {len(X_test)} test, {len(X_val)} val))\n")
+    # Pipeline voor het toepasssen van de encoding. Doet eerst encoding voor het model gegeven wordt.  
     pipeline = Pipeline([
         ("preprocess", preprocess),
-        ("scale", StandardScaler()),
         ("model", model),
     ])
+
+    # Randomized tuning. Grid tuning over de volledige dataset zou te lang duren.
+    # Cross validation over 5 folds. Testset opgedeeld in 5 folds en telkens getest met gegeven parameters. Wordt cross-validated met andere folds. 
     gs = RandomizedSearchCV(estimator=pipeline, cv=5, param_distributions=param_field, scoring="accuracy", n_jobs=-1, random_state=42, refit=True)
+    # Kleinere dataset voor sneller klaar te zijn (ik heb maar 8 cores :( )
     idx = X_train.sample(n=100000, random_state=42).index
     gs.fit(X_train.loc[idx], y_train.loc[idx])
     print(gs.best_params_, gs.best_score_)
     with open("logs.txt", "a", encoding="utf-8") as f:
         f.write(f"{gs.best_params_, gs.best_score_}")
-    best_model = gs.best_estimator_       
+    best_model = gs.best_estimator_ 
     validation_accuracy = best_model.score(X_val, y_val)
     print(f"Vallidation accuracy: {validation_accuracy}")
     with open("logs.txt", "a", encoding="utf-8") as f:

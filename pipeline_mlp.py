@@ -10,6 +10,10 @@ MLP_PARAMS = {
     "model__batch_size": [128, 256, 512],
     "model__n_iter_no_change": [10, 20],
 }
+
+# Neuraal netwerk. Neemt de verschillende audio features als input.
+# Door onderliggende de weights tussen de neurons aan te passen en gewichten toe te kennen kunnen de verschillende audio features door het netwerk gaan en vervolgens een voorspelling te doen
+# Gelijkaardig aan decision trees kan het model zo verbanden op te bouwen tussen verschillende features en hun genre. 
 def mlp():
     model= MLPClassifier(hidden_layer_sizes=(64, 32), max_iter=1000,
                               early_stopping=True, random_state=42)

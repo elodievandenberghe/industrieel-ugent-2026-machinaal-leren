@@ -12,7 +12,7 @@ from sklearn.metrics import (
     f1_score,
 )
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import train_test_split
 DATA_PATH = "Spotify_tracks_final.csv"
@@ -187,19 +187,20 @@ def train_model(model, out_path, param_field):
     # Pipeline voor het toepasssen van de encoding. Doet eerst encoding voor het model gegeven wordt.  
     pipeline = Pipeline([
         ("preprocess", preprocess),
+        ("scale", StandardScaler())
         ("model", model),
     ])
 
     # Randomized tuning. Grid tuning over de volledige dataset zou te lang duren.
     # Cross validation over 5 folds. Testset opgedeeld in 5 folds en telkens getest met gegeven parameters. Wordt cross-validated met andere folds. 
     gs = RandomizedSearchCV(estimator=pipeline, cv=5, param_distributions=param_field, scoring="accuracy", n_jobs=-1, random_state=42, refit=True)
-    # Kleinere dataset voor sneller klaar te zijn (ik heb maar 8 cores :( )
+    # Limit scope to get done fa
     idx = X_train.sample(n=100000, random_state=42).index
     gs.fit(X_train.loc[idx], y_train.loc[idx])
     print(gs.best_params_, gs.best_score_)
     with open("logs.txt", "a", encoding="utf-8") as f:
         f.write(f"{gs.best_params_, gs.best_score_}")
-    best_model = gs.best_estimator_ 
+    best_model = gs.best_estimator_       
     validation_accuracy = best_model.score(X_val, y_val)
     print(f"Vallidation accuracy: {validation_accuracy}")
     with open("logs.txt", "a", encoding="utf-8") as f:

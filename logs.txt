@@ -1,24 +1,8 @@
-Dataset: 1408709 samples (986659 train, 211307 test)
-{gs.best_params_, gs.best_score_}Dataset: 1408709 samples (986659 train, 211307 test)
-{gs.best_params_, gs.best_score_}Validation accuracy: 0.5474108274058925Accuracy: 0.583                 precision    recall  f1-score   support
-
-Classical/Opera       0.77      0.76      0.76     18189
-   Country/Folk       0.46      0.47      0.47     18362
-     Electronic       0.73      0.75      0.74     34610
-     Funk/Disco       0.44      0.28      0.34      9497
-    Hip-Hop/R&B       0.53      0.49      0.51     10920
-     Jazz/Blues       0.47      0.39      0.43     11564
-          Latin       0.54      0.54      0.54     28380
-          Metal       0.74      0.67      0.70     10605
-            Pop       0.51      0.49      0.50     26099
-           Rock       0.54      0.63      0.58     43081
-
-       accuracy                           0.58    211307
-      macro avg       0.57      0.55      0.56    211307
-   weighted avg       0.58      0.58      0.58    211307
-=====Histgradient=====Dataset: 1408709 samples (986659 train, 211307 test)
-=====Histgradient=====Dataset: 1408709 samples (986659 train, 211307 test, 210743 val))
-({'model__l2_regularization': np.float64(0.00678838791242122), 'model__learning_rate': np.float64(0.06895443757896232), 'model__max_bins': 127, 'model__max_depth': 10, 'model__max_iter': 601, 'model__max_leaf_nodes': 104, 'model__min_samples_leaf': 48}, np.float64(0.5447))Vallidation accuracy: 0.5474108274058925Accuracy: 0.583                 precision    recall  f1-score   support
+=====Histgradient=====
+Dataset: 1408709 samples (986659 train, 211307 test, 210743 val))
+({'model__l2_regularization': np.float64(0.00678838791242122), 'model__learning_rate': np.float64(0.06895443757896232), 'model__max_bins': 127, 'model__max_depth': 10, 'model__max_iter': 601, 'model__max_leaf_nodes': 104, 'model__min_samples_leaf': 48}, np.float64(0.5447))
+Vallidation accuracy: 0.5474108274058925
+Accuracy: 0.583                 precision    recall  f1-score   support
 
 Classical/Opera       0.77      0.76      0.76     18189
    Country/Folk       0.46      0.47      0.47     18362
@@ -35,4 +19,82 @@ Classical/Opera       0.77      0.76      0.76     18189
       macro avg       0.57      0.55      0.56    211307
    weighted avg       0.58      0.58      0.58    211307
 
-Permutation importances (test set):{importances.sort_values(ascending=False)}=====KNN=====Dataset: 1408709 samples (986659 train, 211307 test, 210743 val))
+Permutation importances (test set):acousticness        0.138732
+danceability        0.111773
+release_year        0.109235
+instrumentalness    0.085766
+popularity          0.072063
+energy              0.056272
+valence             0.050797
+duration_ms         0.048694
+speechiness         0.045771
+loudness            0.041004
+tempo               0.027628
+liveness            0.012785
+key                 0.007858
+mode                0.006828
+dtype: float64
+
+
+=====MLP=====
+Dataset: 1408709 samples (986659 train, 211307 test, 210743 val))
+({'model__activation': 'tanh', 'model__alpha': np.float64(0.00014742753159914678), 'model__batch_size': 512, 'model__hidden_layer_sizes': (128, 64, 32), 'model__learning_rate_init': np.float64(0.0005820013372709853), 'model__n_iter_no_change': 20}, np.float64(0.51871))
+Vallidation accuracy: 0.5206388824302587
+Accuracy: 0.558                 precision    recall  f1-score   support
+
+Classical/Opera       0.74      0.74      0.74     18189
+   Country/Folk       0.43      0.46      0.44     18362
+     Electronic       0.71      0.73      0.72     34610
+     Funk/Disco       0.41      0.23      0.30      9497
+    Hip-Hop/R&B       0.48      0.48      0.48     10920
+     Jazz/Blues       0.41      0.39      0.40     11564
+          Latin       0.52      0.50      0.51     28380
+          Metal       0.71      0.64      0.67     10605
+            Pop       0.47      0.48      0.48     26099
+           Rock       0.54      0.59      0.56     43081
+
+       accuracy                           0.56    211307
+      macro avg       0.54      0.52      0.53    211307
+   weighted avg       0.56      0.56      0.56    211307
+
+Permutation importances (test set):danceability        0.120075
+acousticness        0.119953
+release_year        0.101519
+energy              0.098370
+popularity          0.067623
+instrumentalness    0.064050
+valence             0.059790
+loudness            0.057145
+duration_ms         0.048971
+speechiness         0.046733
+tempo               0.025397
+liveness            0.011189
+key                 0.008880
+mode                0.007087
+dtype: float64
+
+
+=====KNN=====
+Dataset: 1408709 samples (986659 train, 211307 test, 210743 val))
+({'model__algorithm': 'kd_tree', 'model__leaf_size': 43, 'model__n_neighbors': 28, 'model__p': 1, 'model__weights': 'distance'}, np.float64(0.47639))
+Vallidation accuracy: 0.4803053956715051
+Accuracy: 0.520                 precision    recall  f1-score   support
+
+Classical/Opera       0.67      0.74      0.71     18189
+   Country/Folk       0.38      0.41      0.40     18362
+     Electronic       0.69      0.68      0.68     34610
+     Funk/Disco       0.41      0.17      0.24      9497
+    Hip-Hop/R&B       0.46      0.41      0.43     10920
+     Jazz/Blues       0.46      0.18      0.26     11564
+          Latin       0.46      0.50      0.48     28380
+          Metal       0.68      0.61      0.64     10605
+            Pop       0.41      0.44      0.42     26099
+           Rock       0.49      0.58      0.53     43081
+
+       accuracy                           0.52    211307
+      macro avg       0.51      0.47      0.48    211307
+   weighted avg       0.52      0.52      0.51    211307
+=====KNN=====
+Dataset: 1408709 samples (986659 train, 211307 test, 210743 val))
+({'model__algorithm': 'kd_tree', 'model__leaf_size': 43, 'model__n_neighbors': 28, 'model__p': 1, 'model__weights': 'distance'}, np.float64(0.47639))
+Vallidation accuracy: 0.4803053956715051
